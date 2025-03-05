@@ -1,5 +1,5 @@
 # Spear
-A quick experimental project focused on tracking profitable traders and monitoring projects in the Solana and Base ecosystems through Discord bots.
+A project I built to track profitable Solana wallets, as well as to track when Virtuals (AI) tokens graduated from the bonding curve.  Initially created for myself, but gained usage from others and integrated into a discord with 400+ users.
 
 > **Note**: The Solana tracking component was discontinued due to high API costs. The Base virtuals tracking has seen limited utility due to low trading volume.
 
