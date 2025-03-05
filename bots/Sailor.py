@@ -9,6 +9,9 @@ import http.server
 import socketserver
 import asyncio
 
+# Load environment variables
+load_dotenv()
+
 class WhaleTracker(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
@@ -23,8 +26,10 @@ class WhaleTracker(commands.Bot):
         }
         self.base_url = "https://pro-api.solscan.io/v2.0"
         
-        # Discord channel configuration 
-        self.DISCORD_CHANNEL_IDS = [1312524220722450604, 1323537633095188520]
+        # Discord channel configuration
+        channel_ids_str = os.getenv('SAILOR_MAIN_CHANNEL_IDS', '1312524220722450604,1323537633095188520')
+        self.DISCORD_CHANNEL_IDS = [int(id.strip()) for id in channel_ids_str.split(',')]
+        self.SELL_CHANNEL_ID = int(os.getenv('SAILOR_SELL_CHANNEL_ID', '1313432989769924668'))
 
     async def setup_hook(self):
         print("🚀 Setup hook called...")
@@ -154,7 +159,7 @@ class WhaleTracker(commands.Bot):
                         if usd_value >= 1000:
                             await self.send_alert(message)
                         if usd_value <= -1000:
-                            channel = self.get_channel(1313432989769924668)
+                            channel = self.get_channel(self.SELL_CHANNEL_ID)
                             if channel:
                                 await channel.send(message)
             

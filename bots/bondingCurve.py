@@ -11,6 +11,9 @@ import http.server
 import socketserver
 import asyncio
 
+# Load environment variables
+load_dotenv()
+
 class BondingCurve(commands.Bot):
     def __init__(self):
         # Initialize properties
@@ -18,9 +21,11 @@ class BondingCurve(commands.Bot):
         intents.message_content = True
         super().__init__(command_prefix='!', intents=intents)
 
-        self.RPC_URL = "https://base-mainnet.g.alchemy.com/v2/PkGfBEuppZDsdfWHSFOkYDJ9Y-VJjkxx"  # Replace with your RPC URL
+        self.RPC_URL = os.getenv('BONDING_CURVE_RPC_URL', "")  # Get RPC URL from env
         self.web3 = Web3(Web3.HTTPProvider(self.RPC_URL))
-        self.PROXY_CONTRACT_ADDRESS = self.web3.to_checksum_address("0xf66dea7b3e897cd44a5a231c61b6b4423d613259")
+        self.PROXY_CONTRACT_ADDRESS = self.web3.to_checksum_address(
+            os.getenv('BONDING_CURVE_CONTRACT_ADDRESS', "0xf66dea7b3e897cd44a5a231c61b6b4423d613259")
+        )
         self.ABI = [
             {"inputs": [], "stateMutability": "nonpayable", "type": "constructor"},
             {"inputs": [{"internalType": "address", "name": "target", "type": "address"}], "name": "AddressEmptyCode", "type": "error"},
@@ -69,7 +74,8 @@ class BondingCurve(commands.Bot):
         self.contract = self.web3.eth.contract(address=self.PROXY_CONTRACT_ADDRESS, abi=self.ABI)
         self.launched_event = '0x714aa39317ad9a7a7a99db52b44490da5d068a0b2710fffb1a1282ad3cadae1f'
         self.graduated_event = '0x381d54fa425631e6266af114239150fae1d5db67bb65b4fa9ecc65013107e07e'
-        self.DISCORD_CHANNEL_ID = 1324219120530493552
+        self.DISCORD_CHANNEL_ID = int(os.getenv('BONDING_CURVE_GRADUATED_CHANNEL_ID', '1324219120530493552'))
+        self.LAUNCHED_CHANNEL_ID = int(os.getenv('BONDING_CURVE_LAUNCHED_CHANNEL_ID', '1329038551299391539'))
         self.event_filter = None
 
     # Extract token address from topics
@@ -110,7 +116,7 @@ class BondingCurve(commands.Bot):
 
                 if "0x" + event['topics'][0].hex() == self.launched_event:
                     token_address = self.extract_token_address(event['topics'][1])
-                    channel = self.get_channel(1329038551299391539)
+                    channel = self.get_channel(self.LAUNCHED_CHANNEL_ID)
                     if channel:
                         await channel.send(f"[Launched] Token: https://dexscreener.com/base/{token_address}")
 
